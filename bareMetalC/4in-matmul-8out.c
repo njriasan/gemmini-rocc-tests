@@ -59,7 +59,6 @@ int main() {
   elem_t In_2[DIM][DIM/2] row_align(1);
 
   // Allocate random values for each of the inputs
-  srand(time(0)); 
   for (size_t i = 0; i < DIM; ++i) {
     for (size_t j = 0; j < DIM/2; ++j) {
         In_1[i][j] = (rand() % 256) - 128;
@@ -79,6 +78,9 @@ int main() {
   size_t In_1_sp_addr = 0;
   size_t Out_sp_addr = DIM;
   size_t In_2_sp_addr = 2*DIM;
+
+  printf("Set the bitwidth to 4 (2^2)")
+  gemmini_config_ld_precision_bits(DIM / 2, 2); // Use 2 because 4 = 2^2
 
   printf("Move \"In_1\" matrix from main memory into Gemmini's scratchpad\n");
   // Take matrix from in and just move it into scratchpad
