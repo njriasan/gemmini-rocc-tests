@@ -122,6 +122,10 @@ int main() {
   printf("Check whether \"Gemmini\" and \"Software\" matrices are identical\n");
   if (!is_equal_4bit(Out_Software, Out)) {
     printf("Gemmini and Software matrices are different!\n");
+    printf("Input 1");
+    printMatrix_4bit(In_1);
+    printf("Input 2");
+    printMatrix_4bit(In_2);
     printf("\"Gemmini\" matrix:\n");
     printMatrix_4bit(Out);
     printf("\"Software\" matrix:\n");
