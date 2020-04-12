@@ -61,8 +61,12 @@ int main() {
   // Allocate random values for each of the inputs
   for (size_t i = 0; i < DIM; ++i) {
     for (size_t j = 0; j < DIM/2; ++j) {
-        In_1[i][j] = (rand() % 256) - 128;
-        In_2[i][j] = (rand() % 256) - 128;
+        elem_t top_1 = (rand() % 3) - 1;
+        elem_t bottom_1 = (rand() % 3) - 1;
+        elem_t top_2 = (rand() % 3) - 1;
+        elem_t bottom_2 = (rand() % 3) - 1;
+        In_1[i][j] = ((top_1 << 4) & 0xF0) | (bottom_1 & 0x0F);
+        In_2[i][j] = ((top_2 << 4) & 0xF0) | (bottom_2 & 0x0F);
     }
   }
 
