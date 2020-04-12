@@ -1,6 +1,8 @@
 include $(abs_top_srcdir)/Makefrag
 
 tests = \
+	4in-matmul-4out \
+	4in-matmul-8out \
 	mvin_mvout \
 	mvin_mvout_stride \
 	mvin_mvout_acc \
