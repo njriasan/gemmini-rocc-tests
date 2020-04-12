@@ -37,7 +37,7 @@ void software_matmul_halfdim(elem_t A[DIM][DIM/2], elem_t B[DIM][DIM/2], elem_t 
          elem_t b = extract_4bit_signed(B[k][j /2], j % 2);
          // Assume that overflow in addition will not interfere with different elems
          elem_t c = a * b;
-         c = (c + extract_4_bit_signed(C[i][j/2], j % 2)) & 0x0F;
+         c = (c + extract_4bit_signed(C[i][j/2], j % 2)) & 0x0F;
          if (j % 2 == 0) {
             c = c << 4 | (C[i][j/2] & 0x0F);
          } else {
@@ -91,6 +91,9 @@ int main() {
   size_t Out_sp_addr = DIM;
   size_t In_2_sp_addr = 2*DIM;
 
+  printf("Set the bitwidth to 4 (2^2)");
+  gemmini_config_ld_precision_bits(DIM / 2, 2); // Use 2 because 4 = 2^2
+
   printf("Move \"In_1\" matrix from main memory into Gemmini's scratchpad\n");
   // Take matrix from in and just move it into scratchpad
   // Replace this instruction with one that can specify bit witdth
@@ -111,18 +114,18 @@ int main() {
   gemmini_mvout(Out, Out_sp_addr);
 
   // Do a software version of the same results
-  software_halfDIM(In_1, In_2, Out_Software);
+  software_matmul_halfdim(In_1, In_2, Out_Software);
 
   printf("Fence till Gemmini completes all memory operations\n");
   gemmini_fence();
 
   printf("Check whether \"Gemmini\" and \"Software\" matrices are identical\n");
-  if (!is_equal(Out_Software, Out)) {
+  if (!is_equal_4bit(Out_Software, Out)) {
     printf("Gemmini and Software matrices are different!\n");
     printf("\"Gemmini\" matrix:\n");
-    printMatrix(Out);
+    printMatrix_4bit(Out);
     printf("\"Software\" matrix:\n");
-    printMatrix(Out_Software);
+    printMatrix_4bit(Out_Software);
     printf("\n");
 
     exit(1);

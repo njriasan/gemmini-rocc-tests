@@ -35,7 +35,7 @@ void software_matmul_halfdim(elem_t A[DIM][DIM/2], elem_t B[DIM][DIM/2], elem_t 
       for (size_t i = 0; i < DIM; ++i) {
          elem_t a = extract_4bit_signed(A[i][k /2], k % 2);
          elem_t b = extract_4bit_signed(B[k][j /2], j % 2);
-         C[i][j] += a * b
+         C[i][j] += a * b;
       }
     }  
   }
@@ -83,7 +83,7 @@ int main() {
   size_t Out_sp_addr = DIM;
   size_t In_2_sp_addr = 2*DIM;
 
-  printf("Set the bitwidth to 4 (2^2)")
+  printf("Set the bitwidth to 4 (2^2)");
   gemmini_config_ld_precision_bits(DIM / 2, 2); // Use 2 because 4 = 2^2
 
   printf("Move \"In_1\" matrix from main memory into Gemmini's scratchpad\n");
@@ -106,7 +106,7 @@ int main() {
   gemmini_mvout(Out, Out_sp_addr);
 
   // Do a software version of the same results
-  software_halfDIM(In_1, In_2, Out_Software);
+  software_matmul_halfdim(In_1, In_2, Out_Software);
 
   printf("Fence till Gemmini completes all memory operations\n");
   gemmini_fence();

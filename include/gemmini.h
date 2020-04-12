@@ -92,8 +92,22 @@ void transpose(elem_t in[DIM][DIM], elem_t out[DIM][DIM]) {
 
 void printMatrix(elem_t m[DIM][DIM]) {
   for (size_t i = 0; i < DIM; ++i) {
-    for (size_t j = 0; j < DIM; ++j)
+    for (size_t j = 0; j < DIM; ++j) {
       printf("%d ", m[i][j]);
+    }
+    printf("\n");
+  }
+}
+
+void printMatrix_4bit(elem_t m[DIM][DIM/2]) {
+  for (size_t i = 0; i < DIM; ++i) {
+    for (size_t j = 0; j < DIM/2; ++j) {
+      elem_t m_elem = m[i][j/2];
+      elem_t upper = (m_elem >> 4) & 0x0F;
+      elem_t lower = m_elem & 0x0F;
+      printf("%d ", upper);
+      printf("%d ", lower);
+    }
     printf("\n");
   }
 }
@@ -101,6 +115,14 @@ void printMatrix(elem_t m[DIM][DIM]) {
 int is_equal(elem_t x[DIM][DIM], elem_t y[DIM][DIM]) {
   for (size_t i = 0; i < DIM; ++i)
     for (size_t j = 0; j < DIM; ++j)
+      if (x[i][j] != y[i][j])
+          return 0;
+  return 1;
+}
+
+int is_equal_4bit(elem_t x[DIM][DIM/2], elem_t y[DIM][DIM/2]) {
+  for (size_t i = 0; i < DIM; ++i)
+    for (size_t j = 0; j < DIM/2; ++j)
       if (x[i][j] != y[i][j])
           return 0;
   return 1;
