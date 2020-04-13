@@ -114,9 +114,9 @@ int main() {
   printf("Check whether \"Gemmini\" and \"Software\" matrices are identical\n");
   if (!is_equal(Out_Software, Out)) {
     printf("Gemmini and Software matrices are different!\n");
-    printf("Input 1");
+    printf("Input 1\n");
     printMatrix_4bit(In_1);
-    printf("Input 2");
+    printf("Input 2\n");
     printMatrix_4bit(In_2);
     printf("\"Gemmini\" matrix:\n");
     printMatrix(Out);
