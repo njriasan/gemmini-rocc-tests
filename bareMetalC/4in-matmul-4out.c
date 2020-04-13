@@ -33,8 +33,20 @@ elem_t extract_4bit_signed(elem_t num, elem_t high) {
 void compress_matrix(elem_t src[DIM][DIM], elem_t dst[DIM][DIM/2]) {
   for (size_t i = 0; i < DIM; ++i) {
     for (size_t j = 0; j < DIM/2; ++j) {
-        elem_t low = src[i][2 * j] & 0X0F;
-        elem_t high = src[i][(2 * j) + 1] & 0X0F;
+        elem_t low = src[i][2 * j];
+        if (low < -8) {
+            low = -8;
+        } else if (low > 7) {
+            low = 7;
+        }
+        low = low & 0X0F;
+        elem_t high = src[i][(2 * j) + 1];
+        if (high < -8) {
+            high = -8;
+        } else if (high > 7) {
+            high = 7;
+        }
+        high = high & 0X0F;
         elem_t result = ((high << 4) & 0xF0) | low;
         dst[i][j] = result;
     }
@@ -109,13 +121,10 @@ int main() {
   gemmini_mvin(In_2, In_2_sp_addr);
 
   printf("Multiply \"In_1\" matrix with \"In_2\" matrix with a bias of 0\n");
-  gemmini_config_ex(OUTPUT_STATIONARY, 0, 0, 0, 0);
+  printf("Set the store bitwidth to 4 (2^2)");
+  gemmini_config_ex_precision_bits(OUTPUT_STATIONARY, 0, 0, 0, 0, 2);
   gemmini_preload_zeros(Out_sp_addr);
   gemmini_compute_preloaded(In_1_sp_addr, In_2_sp_addr);
-
-  // Set the store precision to reduce to 4 bits
-  printf("Set the store bitwidth to 4 (2^2)");
-  gemmini_config_st_precision_bits(DIM / 2, 2); // Use 2 because 4 = 2^2
 
   printf("Move \"Out\" matrix from Gemmini's scratchpad into main memory\n");
   gemmini_mvout(Out, Out_sp_addr);

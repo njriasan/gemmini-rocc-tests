@@ -6,6 +6,7 @@ tests = \
 	8in-matmul-8out \
 	8in-matmul-8out-store \
 	mvin_mvout \
+	mvin_mvout_4bit \
 	mvin_mvout_stride \
 	mvin_mvout_acc \
 	mvin_mvout_acc_stride \

@@ -244,9 +244,6 @@ uint64_t read_cycles() {
     // ROCC_INSTRUCTION_RS1_RS2(XCUSTOM_ACC, ((uint64_t)(B) << 32) | (A), ((uint64_t)(bias) << 48) | ((uint64_t)(K) << 32) | ((J) << 16) | (I), k_LOOP_WS)
 
 // config
-#define gemmini_config_ex(mode, act, sys_shift, acc_shift, relu6_shift) \
-  ROCC_INSTRUCTION_RS1_RS2(XCUSTOM_ACC, ((uint64_t)(acc_shift) << 32) | ((act) << 3) | ((mode) << 2) | CONFIG_EX, ((uint64_t)(relu6_shift) << 32) | (sys_shift), k_CONFIG)
-
 
 #define precision_bits_of(precision) \
    (precision) == 32 ? 5 : \
@@ -255,17 +252,20 @@ uint64_t read_cycles() {
   ((precision) == 4  ? 2 : \
   ((precision) == 2  ? 1 : 0))))
 
+#define gemmini_config_ex_precision_bits(mode, act, sys_shift, acc_shift, relu6_shift, precision_bits) \
+  ROCC_INSTRUCTION_RS1_RS2(XCUSTOM_ACC, ((uint64_t)(acc_shift) << 32) | ((precision_bits) << 29) | ((act) << 3) | ((mode) << 2) | CONFIG_EX, ((uint64_t)(relu6_shift) << 32) | (sys_shift), k_CONFIG)
+
+#define gemmini_config_ex(mode, act, sys_shift, acc_shift, relu6_shift) \
+  gemmini_config_ex_precision_bits(mode, act, sys_shift, acc_shift, relu6_shift, (precision_bits_of(sizeof(elem_t) * 8)))
+
 #define gemmini_config_ld_precision_bits(stride, precision_bits) \
   ROCC_INSTRUCTION_RS1_RS2(XCUSTOM_ACC, ((precision_bits) << 2) | CONFIG_LD, stride, k_CONFIG)
 
 #define gemmini_config_ld(stride) \
   gemmini_config_ld_precision_bits(stride, (precision_bits_of(sizeof(elem_t) * 8)))
 
-#define gemmini_config_st_precision_bits(stride, precision_bits) \
-  ROCC_INSTRUCTION_RS1_RS2(XCUSTOM_ACC, ((precision_bits) << 2) | CONFIG_ST, stride, k_CONFIG)
-
 #define gemmini_config_st(stride) \
-  gemmini_config_st_precision_bits(stride, (precision_bits_of(sizeof(elem_t) * 8)))
+  ROCC_INSTRUCTION_RS1_RS2(XCUSTOM_ACC,  CONFIG_ST, stride, k_CONFIG)
 
 // flush
 #define gemmini_flush(skip) \

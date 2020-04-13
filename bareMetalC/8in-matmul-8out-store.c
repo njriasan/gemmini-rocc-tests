@@ -80,12 +80,11 @@ int main() {
   gemmini_mvin(In_2, In_2_sp_addr);
 
   printf("Multiply \"In_1\" matrix with \"In_2\" matrix with a bias of 0\n");
-  gemmini_config_ex(OUTPUT_STATIONARY, 0, 0, 0, 0);
+  printf("Set the ex bitwidth to 8 (2^3)"); 
+  gemmini_config_ex_precision_bits(OUTPUT_STATIONARY, 0, 0, 0, 0, 3);
   gemmini_preload_zeros(Out_sp_addr);
   gemmini_compute_preloaded(In_1_sp_addr, In_2_sp_addr);
 
-  printf("Set the store bitwidth to 4 (2^2)");
-  gemmini_config_ld_precision_bits(DIM, 3); // Use 2 because 4 = 2^2
 
   printf("Move \"Out\" matrix from Gemmini's scratchpad into main memory\n");
   // No need to replace the move out instruction yet. For this test we assume
