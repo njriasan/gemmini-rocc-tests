@@ -67,7 +67,7 @@ int main() {
   size_t Out_sp_addr = DIM;
   size_t In_2_sp_addr = 2*DIM;
 
-  printf("Set the bitwidth to 4 (2^2)");
+  printf("Set the load bitwidth to 4 (2^2)");
   gemmini_config_ld_precision_bits(DIM, 3); // Use 2 because 4 = 2^2
 
   printf("Move \"In_1\" matrix from main memory into Gemmini's scratchpad\n");

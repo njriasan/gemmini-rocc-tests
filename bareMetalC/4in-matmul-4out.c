@@ -96,7 +96,7 @@ int main() {
   size_t Out_sp_addr = DIM;
   size_t In_2_sp_addr = 2*DIM;
 
-  printf("Set the bitwidth to 4 (2^2)");
+  printf("Set the load bitwidth to 4 (2^2)");
   gemmini_config_ld_precision_bits(DIM / 2, 2); // Use 2 because 4 = 2^2
 
   printf("Move \"In_1\" matrix from main memory into Gemmini's scratchpad\n");
@@ -113,9 +113,11 @@ int main() {
   gemmini_preload_zeros(Out_sp_addr);
   gemmini_compute_preloaded(In_1_sp_addr, In_2_sp_addr);
 
+  // Set the store precision to reduce to 4 bits
+  printf("Set the store bitwidth to 4 (2^2)");
+  gemmini_config_st_precision_bits(DIM / 2, 2); // Use 2 because 4 = 2^2
+
   printf("Move \"Out\" matrix from Gemmini's scratchpad into main memory\n");
-  // No need to replace the move out instruction yet. For this test we assume
-  // 8 bits. Unclear if we will need to replace this for 4 bit versions 
   gemmini_mvout(Out, Out_sp_addr);
 
 

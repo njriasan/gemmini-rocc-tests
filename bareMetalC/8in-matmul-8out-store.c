@@ -1,6 +1,6 @@
 // See LICENSE for license details.
 
-// The goal of this test is to verify that sign extended 4-bit multiplications run in hardware will
+// The goal of this test is to verify that sign extended 8-bit multiplications run in hardware will
 // match the result run in gemmini. We assume only signed integers for this example.
 
 #include <stdint.h>
@@ -15,26 +15,12 @@
 #endif
 #include "include/gemmini.h"
 
-elem_t extract_4bit_signed(elem_t num, elem_t high) {
-    elem_t mask = 0b1111;
-    if (high) {
-        num = num >> 4;
-    }
-    num = num & mask;
-    elem_t extend = (num >> 3) & 1;
-    if (extend) {
-        return num | 0xf0;
-    } else {
-        return num;
-    }
-}
-
-void software_matmul_halfdim(elem_t A[DIM][DIM/2], elem_t B[DIM][DIM/2], elem_t C[DIM][DIM]) {
+void software_matmul(elem_t A[DIM][DIM], elem_t B[DIM][DIM], elem_t C[DIM][DIM]) {
   for (size_t j = 0; j < DIM; ++j) {
     for (size_t k = 0; k < DIM; ++k) {
       for (size_t i = 0; i < DIM; ++i) {
-         elem_t a = extract_4bit_signed(A[i][k /2], k % 2);
-         elem_t b = extract_4bit_signed(B[k][j /2], j % 2);
+         elem_t a = A[i][k];
+         elem_t b = B[k][j];
          C[i][j] += a * b;
       }
     }  
@@ -55,18 +41,16 @@ int main() {
   printf("Initialize our input and output matrices in main memory\n");
   // Allocate space for two matrices that fill half the array each
   // Assume DIM is always divisble by two
-  elem_t In_1[DIM][DIM/2] row_align(1);
-  elem_t In_2[DIM][DIM/2] row_align(1);
+  elem_t In_1[DIM][DIM] row_align(1);
+  elem_t In_2[DIM][DIM] row_align(1);
 
   // Allocate random values for each of the inputs
   for (size_t i = 0; i < DIM; ++i) {
-    for (size_t j = 0; j < DIM/2; ++j) {
-        elem_t top_1 = (rand() % 3) - 1;
-        elem_t bottom_1 = (rand() % 3) - 1;
-        elem_t top_2 = (rand() % 3) - 1;
-        elem_t bottom_2 = (rand() % 3) - 1;
-        In_1[i][j] = ((top_1 << 4) & 0xF0) | (bottom_1 & 0x0F);
-        In_2[i][j] = ((top_2 << 4) & 0xF0) | (bottom_2 & 0x0F);
+    for (size_t j = 0; j < DIM; ++j) {
+        elem_t top = (rand() % 3) - 1;
+        elem_t bottom = (rand() % 3) - 1;
+        In_1[i][j] = top;
+        In_2[i][j] = bottom;
     }
   }
 
@@ -83,8 +67,8 @@ int main() {
   size_t Out_sp_addr = DIM;
   size_t In_2_sp_addr = 2*DIM;
 
-  printf("Set the store bitwidth to 4 (2^2)");
-  gemmini_config_ld_precision_bits(DIM / 2, 2); // Use 2 because 4 = 2^2
+  printf("Set the load bitwidth to 4 (2^2)");
+  gemmini_config_ld_precision_bits(DIM, 3); // Use 2 because 4 = 2^2
 
   printf("Move \"In_1\" matrix from main memory into Gemmini's scratchpad\n");
   // Take matrix from in and just move it into scratchpad
@@ -100,13 +84,16 @@ int main() {
   gemmini_preload_zeros(Out_sp_addr);
   gemmini_compute_preloaded(In_1_sp_addr, In_2_sp_addr);
 
+  printf("Set the store bitwidth to 4 (2^2)");
+  gemmini_config_ld_precision_bits(DIM, 3); // Use 2 because 4 = 2^2
+
   printf("Move \"Out\" matrix from Gemmini's scratchpad into main memory\n");
   // No need to replace the move out instruction yet. For this test we assume
   // 8 bits. Unclear if we will need to replace this for 4 bit versions 
   gemmini_mvout(Out, Out_sp_addr);
 
   // Do a software version of the same results
-  software_matmul_halfdim(In_1, In_2, Out_Software);
+  software_matmul(In_1, In_2, Out_Software);
 
   printf("Fence till Gemmini completes all memory operations\n");
   gemmini_fence();
@@ -115,9 +102,9 @@ int main() {
   if (!is_equal(Out_Software, Out)) {
     printf("Gemmini and Software matrices are different!\n");
     printf("Input 1\n");
-    printMatrix_4bit(In_1);
+    printMatrix(In_1);
     printf("Input 2\n");
-    printMatrix_4bit(In_2);
+    printMatrix(In_2);
     printf("\"Gemmini\" matrix:\n");
     printMatrix(Out);
     printf("\"Software\" matrix:\n");
