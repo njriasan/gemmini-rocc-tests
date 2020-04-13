@@ -15,6 +15,7 @@
 #endif
 #include "include/gemmini.h"
 
+
 elem_t extract_4bit_signed(elem_t num, elem_t high) {
     elem_t mask = 0b1111;
     if (high) {
@@ -29,21 +30,24 @@ elem_t extract_4bit_signed(elem_t num, elem_t high) {
     }
 }
 
-void software_matmul_halfdim(elem_t A[DIM][DIM/2], elem_t B[DIM][DIM/2], elem_t C[DIM][DIM/2]) {
+void compress_matrix(elem_t src[DIM][DIM], elem_t dst[DIM][DIM/2]) {
+  for (size_t i = 0; i < DIM; ++i) {
+    for (size_t j = 0; j < DIM/2; ++j) {
+        elem_t low = src[i][2 * j] & 0X0F;
+        elem_t high = src[i][(2 * j) + 1] & 0X0F;
+        elem_t result = ((high << 4) & 0xF0) | low;
+        dst[i][j] = result;
+    }
+  }
+}
+
+void software_matmul_halfdim(elem_t A[DIM][DIM/2], elem_t B[DIM][DIM/2], elem_t C[DIM][DIM]) {
   for (size_t j = 0; j < DIM; ++j) {
     for (size_t k = 0; k < DIM; ++k) {
       for (size_t i = 0; i < DIM; ++i) {
          elem_t a = extract_4bit_signed(A[i][k /2], k % 2);
          elem_t b = extract_4bit_signed(B[k][j /2], j % 2);
-         // Assume that overflow in addition will not interfere with different elems
-         elem_t c = a * b;
-         c = (c + extract_4bit_signed(C[i][j/2], j % 2)) & 0x0F;
-         if (j % 2 == 0) {
-            c = c << 4 | (C[i][j/2] & 0x0F);
-         } else {
-            c = (C[i][j/2] & 0xF0) | c;
-         }
-         C[i][j] = c;
+         C[i][j] += a * b;
       }
     }  
   }
@@ -81,9 +85,10 @@ int main() {
   // Output matrix used to calculate the results
   elem_t Out[DIM][DIM/2];
 
+  // Output matrix used to calculate the temporary results to avoid overflow
+  elem_t Temp_Software[DIM][DIM];
   // Output matrix used to calculate the result in software
   elem_t Out_Software[DIM][DIM/2];
-  memset(Out_Software, 0, DIM * DIM/2);
 
   printf("Calculate the scratchpad addresses of all our matrices\n");
   printf("  Note: The scratchpad is \"row-addressed\", where each address contains one matrix row\n");
@@ -113,11 +118,15 @@ int main() {
   // 8 bits. Unclear if we will need to replace this for 4 bit versions 
   gemmini_mvout(Out, Out_sp_addr);
 
-  // Do a software version of the same results
-  software_matmul_halfdim(In_1, In_2, Out_Software);
 
   printf("Fence till Gemmini completes all memory operations\n");
   gemmini_fence();
+  // Clear software in case too much mem is transferred.
+  memset(Temp_Software, 0, DIM * DIM * sizeof(elem_t));
+  memset(Out_Software, 0, DIM * DIM / 2 * sizeof(elem_t));
+  // Do a software version of the same results
+  software_matmul_halfdim(In_1, In_2, Temp_Software);
+  compress_matrix(Temp_Software, Out_Software);
 
   printf("Check whether \"Gemmini\" and \"Software\" matrices are identical\n");
   if (!is_equal_4bit(Out_Software, Out)) {
@@ -130,6 +139,8 @@ int main() {
     printMatrix_4bit(Out);
     printf("\"Software\" matrix:\n");
     printMatrix_4bit(Out_Software);
+    printf("\"Software Intermediate\" matrix:\n");
+    printMatrix(Temp_Software);
     printf("\n");
 
     exit(1);
