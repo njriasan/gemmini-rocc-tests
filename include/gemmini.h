@@ -113,15 +113,15 @@ void printMatrix_4bit(elem_t m[DIM][DIM/2]) {
       if (sign) {
         lower = lower | 0xF0;
       }
-      if (upper < 0) {
-        printf("%d ", upper);
-      } else {
-        printf(" %d ", upper);
-      }
       if (lower < 0) {
         printf("%d ", lower);
       } else {
         printf(" %d ", lower);
+      }
+      if (upper < 0) {
+        printf("%d ", upper);
+      } else {
+        printf(" %d ", upper);
       }
     }
     printf("\n");

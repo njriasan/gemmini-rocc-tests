@@ -15,9 +15,9 @@
 #endif
 #include "include/gemmini.h"
 
-elem_t extract_4bit_signed(elem_t num, elem_t low) {
+elem_t extract_4bit_signed(elem_t num, elem_t high) {
     elem_t mask = 0b1111;
-    if (!low) {
+    if (high) {
         num = num >> 4;
     }
     num = num & mask;
