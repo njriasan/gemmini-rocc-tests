@@ -102,7 +102,7 @@ void printMatrix(elem_t m[DIM][DIM]) {
 void printMatrix_4bit(elem_t m[DIM][DIM/2]) {
   for (size_t i = 0; i < DIM; ++i) {
     for (size_t j = 0; j < DIM/2; ++j) {
-      elem_t m_elem = m[i][j/2];
+      elem_t m_elem = m[i][j];
       elem_t upper = (m_elem >> 4) & 0x0F;
       elem_t sign = (upper >> 3) & 0x01;
       if (sign) {
