@@ -75,7 +75,7 @@ int main() {
 
   // Output matrix used to calculate the result in software
   elem_t Out_Software[DIM][DIM];
-  memset(Out_Software, 0, DIM * DIM);
+  memset(Out_Software, 0, DIM * DIM * sizeof(elem_t));
 
   printf("Calculate the scratchpad addresses of all our matrices\n");
   printf("  Note: The scratchpad is \"row-addressed\", where each address contains one matrix row\n");

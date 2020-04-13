@@ -105,12 +105,14 @@ void printMatrix_4bit(elem_t m[DIM][DIM/2]) {
       elem_t m_elem = m[i][j/2];
       elem_t upper = (m_elem >> 4) & 0x0F;
       elem_t sign = (upper >> 3) & 0x01;
-      elem_t or_val = (sign << 7) | (sign << 6) | (sign << 5) | (sign << 4);
-      upper = upper | or_val;
+      if (sign) {
+        upper = upper | 0xF0;
+      }
       elem_t lower = m_elem & 0x0F;
       sign = (lower >> 3) & 0x01;
-      or_val = (sign << 7) | (sign << 6) | (sign << 5) | (sign << 4);
-      lower = lower | or_val;
+      if (sign) {
+        lower = lower | 0xF0;
+      }
       if (upper < 0) {
         printf("%d ", upper);
       } else {
