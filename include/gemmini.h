@@ -264,8 +264,11 @@ uint64_t read_cycles() {
 #define gemmini_config_ld(stride) \
   gemmini_config_ld_precision_bits(stride, (precision_bits_of(sizeof(elem_t) * 8)))
 
+#define gemmini_config_st_precision_bits(stride, precision_bits) \
+  ROCC_INSTRUCTION_RS1_RS2(XCUSTOM_ACC, ((precision_bits) << 2) | CONFIG_ST, stride, k_CONFIG)
+
 #define gemmini_config_st(stride) \
-  ROCC_INSTRUCTION_RS1_RS2(XCUSTOM_ACC,  CONFIG_ST, stride, k_CONFIG)
+  gemmini_config_st_precision_bits(stride, (precision_bits_of(sizeof(elem_t) * 8)))
 
 // flush
 #define gemmini_flush(skip) \

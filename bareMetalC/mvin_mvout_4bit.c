@@ -39,11 +39,15 @@ int main() {
   }
 
 
-  printf("Set the load bitwidth to 4 (2^2)");
+  printf("Set the load bitwidth to 4 (2^2)\n");
   gemmini_config_ld_precision_bits(DIM / 2, 2); // Use 2 because 4 = 2^2
 
   printf("Move In the data\n");
   gemmini_mvin(In, DIM);
+
+  printf("Set the store bitwidth to 4 (2^2)\n");
+  gemmini_config_st_precision_bits(DIM / 2, 2); // Use 2 because 4 = 2^2
+
   printf("Move Out the data\n");
   gemmini_mvout(Out[0], DIM);
 
