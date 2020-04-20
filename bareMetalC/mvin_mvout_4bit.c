@@ -51,7 +51,7 @@ int main() {
   printf("Move Out the data\n");
   gemmini_mvout(Out[0], DIM);
 
-  printf("Fence");
+  printf("Fence\n");
   gemmini_fence();
 
   int exitcode = 0;
