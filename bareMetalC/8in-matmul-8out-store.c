@@ -81,7 +81,7 @@ int main() {
 
   printf("Multiply \"In_1\" matrix with \"In_2\" matrix with a bias of 0\n");
   printf("Set the ex bitwidth to 8 (2^3)\n"); 
-  //gemmini_config_ex_precision_bits(OUTPUT_STATIONARY, 0, 0, 0, 0, 3);
+  gemmini_config_ex_precision_bits(OUTPUT_STATIONARY, 0, 0, 0, 0, 3);
   gemmini_preload_zeros(Out_sp_addr);
   gemmini_compute_preloaded(In_1_sp_addr, In_2_sp_addr);
 
