@@ -24,10 +24,10 @@ void operands(int c, int * a, int * b, int * d) {
 
 void test_os() {
   // Output stationary
-  // printf("Output-stationary\n");
+  printf("Output-stationary\n");
   for (int activation = 0; activation <= 2; ++activation) {
     for (int shift = 0; shift <= 4; shift += 4) {
-      // printf("activation: %d, shift: %d\n", activation, shift);
+      printf("activation: %d, shift: %d\n", activation, shift);
 
       static elem_t A[N][DIM][DIM] row_align(1);
       static elem_t B[N][DIM][DIM] row_align(1);
@@ -57,7 +57,7 @@ void test_os() {
       no_output[N*N*N-1] = 0;
 
       // Print the sequence out
-      /*printf("Preloads: ");
+      printf("Preloads: ");
       for (int i = 0; i < N*N*N; ++i)
         printf("%d, ", preload[i]);
       printf("\n");
@@ -68,7 +68,7 @@ void test_os() {
       printf("No outputs: ");
       for (int i = 0; i < N*N*N; ++i)
         printf("%d, ", no_output[i]);
-      printf("\n");*/
+      printf("\n");
 
       for (size_t n = 0; n < N; ++n) {
         for (size_t i = 0; i < DIM; ++i) {
@@ -105,7 +105,7 @@ void test_os() {
       int D_addr = 2*BANK_ROWS; // 2*N*DIM;
       int C_addr = 3*BANK_ROWS; // 3*N*DIM;
 
-      // printf("Moving in\n");
+      printf("Moving in\n");
       for (size_t n = 0; n < N; ++n)
         gemmini_mvin(A[n], A_addr + n*DIM);
       
@@ -116,10 +116,10 @@ void test_os() {
         gemmini_mvin(D[n], D_addr + n*DIM);
       }
 
-      // printf("Setting mode\n");
+      printf("Setting mode\n");
       gemmini_config_ex(OUTPUT_STATIONARY, activation, shift, 0, relu6_shift);
 
-      // printf("Matmulling\n");
+      printf("Matmulling\n");
       for (size_t c = 0; c < N*N*N; ++c) {
         int a, b, d;
         operands(c, &a, &b, &d);
@@ -140,7 +140,7 @@ void test_os() {
         }
       }
 
-      // printf("Moving out\n");
+      printf("Moving out\n");
       for (size_t c = 0; c < N*N*N; ++c)
         if (!no_output[c]) {
           gemmini_mvout(C[c], C_addr + c*DIM);
@@ -148,7 +148,6 @@ void test_os() {
 
       gemmini_fence();
 
-      /*
       printf("Moved out\n");
 
       printf("A[0]:\n");
@@ -165,7 +164,6 @@ void test_os() {
           printf("\n");
         }
       }
-      */
 
       for (int n = 0; n < N*N*N; ++n)
         if (!no_output[n] && !is_equal(C[n], gold[n])) {
@@ -185,7 +183,7 @@ void test_os() {
 
 void test_ws() {
   // Weight-stationary
-  // printf("Weight-stationary\n");
+  printf("Weight-stationary\n");
   for (int activation = 0; activation <= 2; ++activation) {
     for (int shift = 0; shift <= 4; shift += 4) {
       static elem_t A[N][DIM][DIM] row_align(1);
@@ -220,7 +218,7 @@ void test_ws() {
       no_output[N*N*N-1] = 0;
 
       // Print the sequence out
-      /*printf("Preloads: ");
+      printf("Preloads: ");
       for (int i = 0; i < N*N*N; ++i)
         printf("%d, ", preload[i]);
       printf("\n");
@@ -235,7 +233,7 @@ void test_ws() {
       printf("No outputs: ");
       for (int i = 0; i < N*N*N; ++i)
         printf("%d, ", no_output[i]);
-      printf("\n");*/
+      printf("\n");
 
       for (size_t n = 0; n < N; ++n) {
         for (size_t i = 0; i < DIM; ++i) {
@@ -295,7 +293,7 @@ void test_ws() {
           C_addrs[c] = C_addrs[last_c] | (1 << (ADDR_LEN-2));
       }
 
-      // printf("Moving in\n");
+      printf("Moving in\n");
       for (size_t n = 0; n < N; ++n)
         gemmini_mvin(A[n], A_addr + n*DIM);
 
@@ -305,10 +303,10 @@ void test_ws() {
       for (size_t n = 0; n < N; ++n)
         gemmini_mvin(D[n], D_addr + n*DIM);
 
-      // printf("Setting mode\n");
+      printf("Setting mode\n");
       gemmini_config_ex(WEIGHT_STATIONARY, activation, 0, shift, relu6_shift);
 
-      // printf("Matmulling\n");
+      printf("Matmulling\n");
       for (size_t c = 0; c < N*N*N; ++c) {
         int a, b, d;
         operands(c, &a, &b, &d);
@@ -326,7 +324,7 @@ void test_ws() {
         }
       }
 
-      // printf("Moving out\n");
+      printf("Moving out\n");
       for (size_t c = 0; c < N*N*N; ++c)
         if (!no_output[c]) {
           gemmini_mvout(C[c], C_addrs[c] & ~(1 << (ADDR_LEN-2)));
@@ -334,7 +332,7 @@ void test_ws() {
 
       gemmini_fence();
 
-      /*printf("Moved out\n");
+      printf("Moved out\n");
       for (int n = 0; n < N*N*N; ++n) {
         if (!no_output[n]) {
           printf("C:\n");
@@ -343,7 +341,7 @@ void test_ws() {
           printMatrix(gold[n]);
           printf("\n");
         }
-      }*/
+      }
 
       for (int n = 0; n < N*N*N; ++n)
         if (!no_output[n] && !is_equal(C[n], gold[n]))

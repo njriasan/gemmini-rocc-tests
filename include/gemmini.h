@@ -99,8 +99,48 @@ void printMatrix(elem_t m[DIM][DIM]) {
   }
 }
 
+/* Assumes m is m[n][DIM] */
+void printMatrix_var_len(elem_t (*m)[DIM], uint32_t n) {
+  for (size_t i = 0; i < n; ++i) {
+    for (size_t j = 0; j < DIM; ++j) {
+      printf("%d ", m[i][j]);
+    }
+    printf("\n");
+  }
+}
+
 void printMatrix_4bit(elem_t m[DIM][DIM/2]) {
   for (size_t i = 0; i < DIM; ++i) {
+    for (size_t j = 0; j < DIM/2; ++j) {
+      elem_t m_elem = m[i][j];
+      elem_t upper = (m_elem >> 4) & 0x0F;
+      elem_t sign = (upper >> 3) & 0x01;
+      if (sign) {
+        upper = upper | 0xF0;
+      }
+      elem_t lower = m_elem & 0x0F;
+      sign = (lower >> 3) & 0x01;
+      if (sign) {
+        lower = lower | 0xF0;
+      }
+      if (lower < 0) {
+        printf("%d ", lower);
+      } else {
+        printf(" %d ", lower);
+      }
+      if (upper < 0) {
+        printf("%d ", upper);
+      } else {
+        printf(" %d ", upper);
+      }
+    }
+    printf("\n");
+  }
+}
+
+/* Assumes m is m[n][DIM/2] */
+void printMatrix_4bit_var_len(elem_t (*m)[DIM/2], uint32_t n) {
+  for (size_t i = 0; i < n; ++i) {
     for (size_t j = 0; j < DIM/2; ++j) {
       elem_t m_elem = m[i][j];
       elem_t upper = (m_elem >> 4) & 0x0F;
@@ -136,8 +176,26 @@ int is_equal(elem_t x[DIM][DIM], elem_t y[DIM][DIM]) {
   return 1;
 }
 
+/* Assumes x and y are x[n][DIM] and y[n][DIM]. */
+int is_equal_var_len(elem_t (*x)[DIM], elem_t (*y)[DIM], uint32_t n) {
+  for (size_t i = 0; i < n; ++i)
+    for (size_t j = 0; j < DIM; ++j)
+      if (x[i][j] != y[i][j])
+          return 0;
+  return 1;
+}
+
 int is_equal_4bit(elem_t x[DIM][DIM/2], elem_t y[DIM][DIM/2]) {
   for (size_t i = 0; i < DIM; ++i)
+    for (size_t j = 0; j < DIM/2; ++j)
+      if (x[i][j] != y[i][j])
+          return 0;
+  return 1;
+}
+
+/* Assumes x and y are x[n][DIM/2] and y[n][DIM/2]. */
+int is_equal_4bit_var_len(elem_t (*x)[DIM/2], elem_t (*y)[DIM/2], uint32_t n) {
+  for (size_t i = 0; i < n; ++i)
     for (size_t j = 0; j < DIM/2; ++j)
       if (x[i][j] != y[i][j])
           return 0;
