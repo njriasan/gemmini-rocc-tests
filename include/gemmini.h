@@ -138,6 +138,55 @@ void printMatrix_4bit(elem_t m[DIM][DIM/2]) {
   }
 }
 
+void printMatrix_2bit(elem_t m[DIM][DIM/4]) {
+  for (size_t i = 0; i < DIM; ++i) {
+    for (size_t j = 0; j < DIM/4; ++j) {
+      elem_t m_elem = m[i][j];
+      elem_t u4 = (m_elem >> 6) & 0x03;
+      elem_t sign = (u4 >> 1) & 0x01;
+      if (sign) {
+        u4 = u4 | 0xFC;
+      }
+      elem_t u3 = (m_elem >> 4) & 0x03;
+      sign = (u3 >> 1) & 0x01;
+      if (sign) {
+        u3 = u3 | 0xFC;
+      }
+      elem_t u2 = (m_elem >> 2) & 0x03;
+      sign = (u2 >> 1) & 0x01;
+      if (sign) {
+        u2 = u2 | 0xFC;
+      }
+      elem_t u1 = m_elem & 0x03;
+      sign = (u1 >> 1) & 0x01;
+      if (sign) {
+        u1 = u1 | 0xFC;
+      }
+      if (u1 < 0) {
+        printf("%d ", u1);
+      } else {
+        printf(" %d ", u1);
+      }
+      if (u2 < 0) {
+        printf("%d ", u2);
+      } else {
+        printf(" %d ", u2);
+      }
+      if (u3 < 0) {
+        printf("%d ", u3);
+      } else {
+        printf(" %d ", u3);
+      }
+      if (u4 < 0) {
+        printf("%d ", u4);
+      } else {
+        printf(" %d ", u4);
+      }
+    }
+    printf("\n");
+  }
+}
+
 /* Assumes m is m[n][DIM/2] */
 void printMatrix_4bit_var_len(elem_t (*m)[DIM/2], uint32_t n) {
   for (size_t i = 0; i < n; ++i) {
@@ -188,6 +237,14 @@ int is_equal_var_len(elem_t (*x)[DIM], elem_t (*y)[DIM], uint32_t n) {
 int is_equal_4bit(elem_t x[DIM][DIM/2], elem_t y[DIM][DIM/2]) {
   for (size_t i = 0; i < DIM; ++i)
     for (size_t j = 0; j < DIM/2; ++j)
+      if (x[i][j] != y[i][j])
+          return 0;
+  return 1;
+}
+
+int is_equal_2bit(elem_t x[DIM][DIM/4], elem_t y[DIM][DIM/4]) {
+  for (size_t i = 0; i < DIM; ++i)
+    for (size_t j = 0; j < DIM/4; ++j)
       if (x[i][j] != y[i][j])
           return 0;
   return 1;

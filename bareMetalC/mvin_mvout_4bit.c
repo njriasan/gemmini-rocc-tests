@@ -26,7 +26,7 @@ int main() {
   gemmini_flush(0);
 
   static elem_t In[DIM][DIM/2] row_align(1);
-  static elem_t Out[2][DIM][DIM/2] row_align(1);
+  static elem_t Out[1][DIM][DIM/2] row_align(1);
   // Matrix used to make sure the mvout doesn't write more than DIM * DIM/2 bytes
   static elem_t OneTwentyThree[DIM][DIM/2] row_align(1);
 
